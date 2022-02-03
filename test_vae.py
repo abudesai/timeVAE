@@ -12,7 +12,7 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from vae_dense_model import VariationalAutoencoderDense as VAE_Dense
 from vae_conv_model import VariationalAutoencoderConv as VAE_Conv
-from vae_conv_I_model import VariationalAutoencoderConvInterpretable as VAE_Conv_I
+from vae_conv_I_model import VariationalAutoencoderConvInterpretable as TimeVAE
 from config import config as cfg
 import utils
 
@@ -29,7 +29,7 @@ if __name__ == '__main__':
     dataset = 'sine'            # sine, stocks, energy
     perc_of_train_used = 20     # 5, 10, 20, 100    
     valid_perc = 0.1
-    vae_type = 'conv_I'           # vae_dense, vae_conv, conv_I
+    vae_type = 'timeVAE'           # vae_dense, vae_conv, timeVAE
     input_file = f'{dataset}_subsampled_train_perc_{perc_of_train_used}.npz'
     full_train_data = utils.get_training_data(data_dir + input_file)
     N, T, D = full_train_data.shape   
@@ -65,8 +65,8 @@ if __name__ == '__main__':
         vae = VAE_Dense( seq_len=T,  feat_dim = D, latent_dim = latent_dim, hidden_layer_sizes=[200,100], )
     elif vae_type == 'vae_conv':
         vae = VAE_Conv( seq_len=T,  feat_dim = D, latent_dim = latent_dim, hidden_layer_sizes=[100, 200] )
-    elif vae_type == 'conv_I':
-        vae = VAE_Conv_I( seq_len=T,  feat_dim = D, latent_dim = latent_dim, hidden_layer_sizes=[50, 100, 200],        #[80, 200, 250] 
+    elif vae_type == 'timeVAE':
+        vae = TimeVAE( seq_len=T,  feat_dim = D, latent_dim = latent_dim, hidden_layer_sizes=[50, 100, 200],        #[80, 200, 250] 
             reconstruction_wt = 3.0,
             # ---------------------
             # disable following three arguments to use the model as TimeVAE_Base. Enabling will convert to Interpretable version.
@@ -140,7 +140,7 @@ if __name__ == '__main__':
     # ----------------------------------------------------------------------------------
     
     # later.... load model 
-    new_vae = VAE_Conv_I.load(model_dir, file_pref)
+    new_vae = TimeVAE.load(model_dir, file_pref)
 
     new_x_decoded = new_vae.predict(scaled_train_data)
     # print('new_x_decoded.shape', new_x_decoded.shape)
