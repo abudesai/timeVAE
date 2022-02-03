@@ -10,5 +10,6 @@ vae_conv_model contains the base version of TimeVAE. See class 'VariationalAutoe
 
 The VariationalAutoencoderConvInterpretable can also be used as base version by disabling the interpretability-related arguments during class initialization. 
 
-
 See script test_vae for usage of the TimeVAE model. 
+
+Note that 'vae_base' script contains an abstract super-class.  It doesnt actually represent TimeVAE-Base. 

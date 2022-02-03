@@ -3,7 +3,7 @@ import os, warnings
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # or any {'0', '1', '2'}
 warnings.filterwarnings('ignore') 
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"  # disabling gpu usage because my cuda is corrupted, needs to be fixed. 
 
 import sys
 import numpy as np , pandas as pd
@@ -13,7 +13,6 @@ from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from vae_dense_model import VariationalAutoencoderDense as VAE_Dense
 from vae_conv_model import VariationalAutoencoderConv as VAE_Conv
 from vae_conv_I_model import VariationalAutoencoderConvInterpretable as TimeVAE
-from config import config as cfg
 import utils
 
 
@@ -23,13 +22,13 @@ if __name__ == '__main__':
     
     data_dir = './datasets/'
     # ----------------------------------------------------------------------------------
+    # choose model
+    vae_type = 'timeVAE'           # vae_dense, vae_conv, timeVAE
     # ----------------------------------------------------------------------------------
-    # read data
-    
+    # read data    
     dataset = 'sine'            # sine, stocks, energy
     perc_of_train_used = 20     # 5, 10, 20, 100    
     valid_perc = 0.1
-    vae_type = 'timeVAE'           # vae_dense, vae_conv, timeVAE
     input_file = f'{dataset}_subsampled_train_perc_{perc_of_train_used}.npz'
     full_train_data = utils.get_training_data(data_dir + input_file)
     N, T, D = full_train_data.shape   
@@ -54,7 +53,6 @@ if __name__ == '__main__':
 
     scaled_valid_data = scaler.transform(valid_data)
     # joblib.dump(scaler, 'scaler.save')  
-    # print("train/valid shapes: ", scaled_train_data.shape, scaled_valid_data.shape)
 
     # ----------------------------------------------------------------------------------
     # instantiate the model     
@@ -67,16 +65,17 @@ if __name__ == '__main__':
         vae = VAE_Conv( seq_len=T,  feat_dim = D, latent_dim = latent_dim, hidden_layer_sizes=[100, 200] )
     elif vae_type == 'timeVAE':
         vae = TimeVAE( seq_len=T,  feat_dim = D, latent_dim = latent_dim, hidden_layer_sizes=[50, 100, 200],        #[80, 200, 250] 
-            reconstruction_wt = 3.0,
-            # ---------------------
-            # disable following three arguments to use the model as TimeVAE_Base. Enabling will convert to Interpretable version.
-            
-            # trend_poly=2, 
-            # custom_seas = [ (6,1), (7, 1), (8,1), (9,1)] ,     # list of tuples of (num_of_seasons, len_per_season)
-            # use_scaler = True,
-            
-            #---------------------------
-            use_residual_conn = True
+                reconstruction_wt = 3.0,
+                # ---------------------
+                # disable following three arguments to use the model as TimeVAE_Base. Enabling will convert to Interpretable version.
+                # Also set use_residual_conn= False if you want to only have interpretable components, and no residual (non-interpretable) component. 
+                
+                # trend_poly=2, 
+                # custom_seas = [ (6,1), (7, 1), (8,1), (9,1)] ,     # list of tuples of (num_of_seasons, len_per_season)
+                # use_scaler = True,
+                
+                #---------------------------
+                use_residual_conn = True
             )   
     else:  raise Exception('wut')
 

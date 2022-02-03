@@ -76,41 +76,46 @@ class VariationalAutoencoderConvInterpretable(BaseVariationalAutoencoder):
 
 
     def _get_decoder(self):
-        decoder_inputs = Input(shape=(self.latent_dim), name='decoder_input')        
+        decoder_inputs = Input(shape=(int(self.latent_dim)), name='decoder_input')    
 
-        outputs = self.level_model(decoder_inputs)
+        outputs = None
+        outputs = self.level_model(decoder_inputs)        
 
         # trend polynomials
         if self.trend_poly is not None and self.trend_poly > 0: 
             trend_vals = self.trend_model(decoder_inputs)
             outputs = trend_vals if outputs is None else outputs + trend_vals 
 
-        # generic seasonalities
-        if self.num_gen_seas is not None and self.num_gen_seas > 0:
-            gen_seas_vals = self.generic_seasonal_model(decoder_inputs)
-            outputs = gen_seas_vals if outputs is None else outputs + gen_seas_vals 
+        # # generic seasonalities
+        # if self.num_gen_seas is not None and self.num_gen_seas > 0:
+        #     gen_seas_vals, freq, phase, amplitude = self.generic_seasonal_model(decoder_inputs)
+        #     # gen_seas_vals = self.generic_seasonal_model2(decoder_inputs)
+        #     outputs = gen_seas_vals if outputs is None else outputs + gen_seas_vals 
 
         # custom seasons
         if self.custom_seas is not None and len(self.custom_seas) > 0: 
             cust_seas_vals = self.custom_seasonal_model(decoder_inputs)
             outputs = cust_seas_vals if outputs is None else outputs + cust_seas_vals 
 
+
         if self.use_residual_conn:
             residuals = self._get_decoder_residual(decoder_inputs)  
             outputs = residuals if outputs is None else outputs + residuals 
-            
-            
+
+
         if self.use_scaler and outputs is not None: 
             scale = self.scale_model(decoder_inputs)
             outputs *= scale
 
+        # outputs = Activation(activation='sigmoid')(outputs)
 
         if outputs is None: 
             raise Exception('''Error: No decoder model to use. 
             You must use one or more of:
             trend, generic seasonality(ies), custom seasonality(ies), and/or residual connection. ''')
         
-        decoder = Model(decoder_inputs, outputs, name="decoder")
+        # decoder = Model(decoder_inputs, [outputs, freq, phase, amplitude], name="decoder")
+        decoder = Model(decoder_inputs, [outputs], name="decoder")
         return decoder
 
 
@@ -127,19 +132,32 @@ class VariationalAutoencoderConvInterpretable(BaseVariationalAutoencoder):
 
 
 
+    def scale_model(self, z): 
+        scale_params = Dense(self.feat_dim, name="scale_params", activation='relu')(z)
+        scale_params = Dense(self.feat_dim, name="scale_params2")(scale_params)
+        scale_params = Reshape(target_shape=(1, self.feat_dim))(scale_params)      # shape: (N, 1, D)
+
+        scale_vals = tf.repeat(scale_params, repeats = self.seq_len, axis = 1)      # shape: (N, T, D)
+        # print('scale_vals', tf.shape(scale_vals))
+        return scale_vals
+
+
+
+
     def trend_model(self, z):
         trend_params = Dense(self.feat_dim * self.trend_poly, name="trend_params", activation='relu')(z)
         trend_params = Dense(self.feat_dim * self.trend_poly, name="trend_params2")(trend_params)
-        trend_params = Reshape(target_shape=(self.feat_dim, self.trend_poly))(trend_params)
+        trend_params = Reshape(target_shape=(self.feat_dim, self.trend_poly))(trend_params)  #shape: N x D x P
+        # print("trend params shape", trend_params.shape)
         # shape of trend_params: (N, D, P)  P = num_poly
 
         lin_space = K.arange(0, float(self.seq_len), 1) / self.seq_len # shape of lin_space : 1d tensor of length T
         poly_space = K.stack([lin_space ** float(p+1) for p in range(self.trend_poly)], axis=0)  # shape: P x T
-        # print('poly_space', poly_space)
+        # print('poly_space', poly_space.shape, poly_space[0])
 
-        trend_vals = K.dot(trend_params, poly_space, name='trend_vals')            # shape (N, D, T)
+        trend_vals = K.dot(trend_params, poly_space)            # shape (N, D, T)
         trend_vals = tf.transpose(trend_vals, perm=[0,2,1])     # shape: (N, T, D)
-        trend_vals = K.cast(trend_vals, np.float32)
+        trend_vals = K.cast(trend_vals, tf.float32)
         # print('trend_vals shape', tf.shape(trend_vals)) 
         return trend_vals
 
