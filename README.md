@@ -1,8 +1,11 @@
 # timeVAE
-TimeVAE implementation in keras/tensorflow
+TimeVAE implementation in keras/tensorflow implementation of timevae: 
 
-implementation of timevae: 
+TimeVAE is used for synthetic timeseries data generation. See paper:
+
 https://arxiv.org/abs/2111.08095
+
+The methodology uses the Variational Autoencoder architecture. The decoder architecture is modified to include interpretable components of time-series, namely, level, trend, and seasonality. 
 
 'vae_conv_I_model.py' script contains the interpretable version of TimeVAE. See class 'VariationalAutoencoderConvInterpretable'. 
 
