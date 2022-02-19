@@ -1,4 +1,4 @@
-# TimeVAE for Synthetic Timeseries data generation
+# TimeVAE for Synthetic Timeseries Data Generation
 TimeVAE implementation in keras/tensorflow implementation of timevae: 
 
 TimeVAE is used for synthetic time-series data generation. See paper:
