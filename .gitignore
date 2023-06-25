@@ -15,6 +15,3 @@ venv.bak/
 
 # Jupyter Notebook
 **/.ipynb_checkpoints/
-
-# Pycache
-**/__pycache__/
