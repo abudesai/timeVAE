@@ -25,7 +25,7 @@ Note that `vae_base.py` script contains an abstract super-class. It doesnt actua
 - Create your virtual environment and install dependencies listed in `requirements.txt`.
 - Prepare your data in the format of numpy array with shape `(n_samples, n_timesteps, n_features)` and save it in the `./datasets/` folder in the `.npz` format.
 - Update the path to your data in the `test_vae.py` script. You can specify the file name in the `input_file` variable.
-- Choose the model near the top of the `test_vae.py` script using the `vae_type` variable. You can choose between `vae_dense`, `vae_conv`, and `timeVAE` for the dense, convolutional (referred to base model in paper), and interpretable versions of TimeVAE, respectively.
+- Choose the model near the top of the `test_vae.py` script using the `vae_type` variable. You can choose between `vae_dense`, `vae_conv`, and `timeVAE` for the dense, convolutional (referred as the base model in paper), and interpretable versions of TimeVAE, respectively.
 - Set the hyperparameters for the model. Key hyperparameters are:
   - `latent_dim` - the number of latent dimensions. Default value is 8.
   - `hidden_layer_sizes` - the number of hidden units in the encoder and decoder. For the dense model, it refers to the number of hidden units in the dense layers. For the convolutional model, it refers to the number of filters in the convolutional layers. Default value is [50, 100, 200]
