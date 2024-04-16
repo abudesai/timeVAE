@@ -52,6 +52,6 @@ This project is licensed under the MIT License - see the `LICENSE.md` file for d
 
 ## Contact Information
 
-You can contact the lead-author of the paper at: <lead author first name>.<lead author last name>@gmail.com
+You can contact the lead-author of the paper at: <lead_author_first_name>.<lead_author_last_name>@gmail.com
 
 See the author names in the paper linked above.
