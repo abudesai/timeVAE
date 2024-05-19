@@ -62,7 +62,7 @@ class BaseVariationalAutoencoder(Model, ABC):
             epochs=max_epochs,
             batch_size=self.batch_size,
             callbacks=[early_stopping, reduce_lr],
-            verbose=verbose
+            verbose=verbose,
         )
 
     def call(self, X):
