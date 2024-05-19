@@ -269,9 +269,10 @@ class TimeVAE(BaseVariationalAutoencoder):
         # back to list of tuples so it is serializable
         if self.custom_seas is not None:
             self.custom_seas = [
-                (int(num_seasons), int(len_per_season)) 
-                for num_seasons, len_per_season in self.custom_seas]
-        
+                (int(num_seasons), int(len_per_season))
+                for num_seasons, len_per_season in self.custom_seas
+            ]
+
         dict_params = {
             "seq_len": self.seq_len,
             "feat_dim": self.feat_dim,
