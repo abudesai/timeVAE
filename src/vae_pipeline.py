@@ -71,24 +71,24 @@ def run_vae_pipeline(dataset_name: str, vae_type: str):
     # ----------------------------------------------------------------------------------
     # Visualize posterior samples
     x_decoded = get_posterior_samples(vae_model, scaled_train_data)
-    # plot_samples(
-    #     samples1=scaled_train_data,
-    #     samples1_name="Original Train",
-    #     samples2=x_decoded,
-    #     samples2_name="Reconstructed Train",
-    #     num_samples=5,
-    # )
+    plot_samples(
+        samples1=scaled_train_data,
+        samples1_name="Original Train",
+        samples2=x_decoded,
+        samples2_name="Reconstructed Train",
+        num_samples=5,
+    )
     # ----------------------------------------------------------------------------------
     # Generate prior samples, visualize and save them
 
     # Generate prior samples
     prior_samples = get_prior_samples(vae_model, num_samples=train_data.shape[0])
     # Plot prior samples
-    # plot_samples(
-    #     samples1=prior_samples,
-    #     samples1_name="Prior Samples",
-    #     num_samples=5,
-    # )
+    plot_samples(
+        samples1=prior_samples,
+        samples1_name="Prior Samples",
+        num_samples=5,
+    )
 
     # visualize t-sne of original and prior samples
     visualize_and_save_tsne(
@@ -137,32 +137,4 @@ if __name__ == "__main__":
     # models: vae_dense, vae_conv, timeVAE
     model_name = "vae_conv"
 
-    datasets = [
-        "air_subsampled_train_perc_2",
-        "air_subsampled_train_perc_5",
-        "air_subsampled_train_perc_10",
-        "air_subsampled_train_perc_20",
-        "air_subsampled_train_perc_100",
-
-        "energy_subsampled_train_perc_2",
-        "energy_subsampled_train_perc_5",
-        "energy_subsampled_train_perc_10",
-        "energy_subsampled_train_perc_20",
-        "energy_subsampled_train_perc_100",
-
-        "sine_subsampled_train_perc_2",
-        "sine_subsampled_train_perc_5",
-        "sine_subsampled_train_perc_10",
-        "sine_subsampled_train_perc_20",
-        "sine_subsampled_train_perc_100",
-
-        "stockv_subsampled_train_perc_2",
-        "stockv_subsampled_train_perc_5",
-        "stockv_subsampled_train_perc_10",
-        "stockv_subsampled_train_perc_20",
-        "stockv_subsampled_train_perc_100",
-    ]
-
-    for dataset in datasets:
-        print(f"Running {dataset=}")
-        run_vae_pipeline(dataset, model_name)
+    run_vae_pipeline(dataset, model_name)
