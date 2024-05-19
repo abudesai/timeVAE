@@ -10,7 +10,7 @@ https://arxiv.org/abs/2111.08095
 
 The methodology uses the Variational Autoencoder architecture. The decoder architecture is modified to include interpretable components of time-series, namely, level, trend, and seasonality. The repo also contains two other baselines: a dense VAE and a convolutional VAE. The dense VAE is a simple VAE with dense layers in the encoder and decoder. The convolutional VAE is a VAE with convolutional layers in the encoder and decoder. The convolutional VAE is referred to as the base model in the paper. See `./src/vae/` for the implementation of the models. Note that `vae_base.py` script contains an abstract super-class. It doesnt actually represent TimeVAE-Base.
 
-See script `vae_pipeline.py` for usage of the TimeVAE model. The `run_vae_pipeline` function in the script is the main function. Specify the dataset name and the model type near the bottom of the script and run. The pipeline does the following:
+See script `./src/vae_pipeline.py` for usage of the TimeVAE model. The `run_vae_pipeline` function in the script is the main function. Specify the dataset name and the model type near the bottom of the script and run. The pipeline does the following:
 
 - Loads the data
 - Splits the data into train and test sets
