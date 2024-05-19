@@ -186,4 +186,4 @@ def visualize_and_save_tsne(
     os.makedirs(save_dir, exist_ok=True)
     plt.savefig(os.path.join(save_dir, f"{scenario_name}.png"))
 
-    # plt.show()
+    plt.show()
