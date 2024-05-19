@@ -11,6 +11,7 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Layer
 from tensorflow.keras.metrics import Mean
 from tensorflow.keras.backend import random_normal
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 
 
 class Sampling(Layer):
@@ -25,18 +26,44 @@ class Sampling(Layer):
 
 
 class BaseVariationalAutoencoder(Model, ABC):
-    def __init__(self, seq_len, feat_dim, latent_dim, reconstruction_wt=3.0, **kwargs):
+    model_name = None
+
+    def __init__(
+        self,
+        seq_len,
+        feat_dim,
+        latent_dim,
+        reconstruction_wt=3.0,
+        batch_size=16,
+        **kwargs,
+    ):
         super(BaseVariationalAutoencoder, self).__init__(**kwargs)
         self.seq_len = seq_len
         self.feat_dim = feat_dim
         self.latent_dim = latent_dim
         self.reconstruction_wt = reconstruction_wt
+        self.batch_size = batch_size
         self.total_loss_tracker = Mean(name="total_loss")
         self.reconstruction_loss_tracker = Mean(name="reconstruction_loss")
         self.kl_loss_tracker = Mean(name="kl_loss")
-
         self.encoder = None
         self.decoder = None
+
+    def fit_on_data(self, train_data, max_epochs=1000, verbose=0):
+        loss_to_monitor = "total_loss"
+        early_stopping = EarlyStopping(
+            monitor=loss_to_monitor, min_delta=1e-2, patience=50, mode="min"
+        )
+        reduce_lr = ReduceLROnPlateau(
+            monitor=loss_to_monitor, factor=0.5, patience=30, mode="min"
+        )
+        self.fit(
+            train_data,
+            epochs=max_epochs,
+            batch_size=self.batch_size,
+            callbacks=[early_stopping, reduce_lr],
+            verbose=verbose
+        )
 
     def call(self, X):
         z_mean, _, _ = self.encoder(X)
@@ -57,7 +84,7 @@ class BaseVariationalAutoencoder(Model, ABC):
 
     def get_prior_samples(self, num_samples):
         Z = np.random.randn(num_samples, self.latent_dim)
-        samples = self.decoder.predict(Z)
+        samples = self.decoder.predict(Z, verbose=0)
         return samples
 
     def get_prior_samples_given_Z(self, Z):
@@ -141,21 +168,32 @@ class BaseVariationalAutoencoder(Model, ABC):
             "kl_loss": self.kl_loss_tracker.result(),
         }
 
-    def save_weights(self, model_dir, file_pref):
+    def save_weights(self, model_dir):
+        if self.model_name is None:
+            raise ValueError("Model name not set.")
         encoder_wts = self.encoder.get_weights()
         decoder_wts = self.decoder.get_weights()
-        joblib.dump(encoder_wts, os.path.join(model_dir, f"{file_pref}encoder_wts.h5"))
-        joblib.dump(decoder_wts, os.path.join(model_dir, f"{file_pref}decoder_wts.h5"))
+        joblib.dump(
+            encoder_wts, os.path.join(model_dir, f"{self.model_name}_encoder_wts.h5")
+        )
+        joblib.dump(
+            decoder_wts, os.path.join(model_dir, f"{self.model_name}_decoder_wts.h5")
+        )
 
-    def load_weights(self, model_dir, file_pref):
-        encoder_wts = joblib.load(os.path.join(model_dir, f"{file_pref}encoder_wts.h5"))
-        decoder_wts = joblib.load(os.path.join(model_dir, f"{file_pref}decoder_wts.h5"))
+    def load_weights(self, model_dir):
+        encoder_wts = joblib.load(
+            os.path.join(model_dir, f"{self.model_name}_encoder_wts.h5")
+        )
+        decoder_wts = joblib.load(
+            os.path.join(model_dir, f"{self.model_name}_decoder_wts.h5")
+        )
 
         self.encoder.set_weights(encoder_wts)
         self.decoder.set_weights(decoder_wts)
 
-    def save(self, model_dir, file_pref):
-        self.save_weights(model_dir, file_pref)
+    def save(self, model_dir):
+        os.makedirs(model_dir, exist_ok=True)
+        self.save_weights(model_dir)
         dict_params = {
             "seq_len": self.seq_len,
             "feat_dim": self.feat_dim,
@@ -163,7 +201,7 @@ class BaseVariationalAutoencoder(Model, ABC):
             "reconstruction_wt": self.reconstruction_wt,
             "hidden_layer_sizes": list(self.hidden_layer_sizes),
         }
-        params_file = os.path.join(model_dir, f"{file_pref}parameters.pkl")
+        params_file = os.path.join(model_dir, f"{self.model_name}_parameters.pkl")
         joblib.dump(dict_params, params_file)
 
 
