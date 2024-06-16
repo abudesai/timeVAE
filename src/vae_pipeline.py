@@ -132,7 +132,7 @@ def run_vae_pipeline(dataset_name: str, vae_type: str):
 
 if __name__ == "__main__":
     # check `/data/` for available datasets
-    dataset = "sine_subsampled_train_perc_2"
+    dataset = "sine_subsampled_train_perc_20"
 
     # models: vae_dense, vae_conv, timeVAE
     model_name = "timeVAE"
