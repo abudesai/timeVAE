@@ -126,6 +126,15 @@ That's fine - the data would still need to be reshaped to be (N, T, D) where D =
 
 TimeVAE naturally handles multivariate time series. Your data shape will be (N, T, D) where D is the number of variables or features in your multivariate series.
 
+#### How do I choose the window length?
+
+This depends on your specific use case - what sized samples are you looking to generate. Two key factors to consider:
+
+1. **Quality of generated samples**: In general, more samples means better quality of generated data, but also longer samples (but not unnecessarily lengthy) improve quality. Since these are counteracting, you need to pick the window length that gives the best balance.
+2. **Application requirements**: Consider what length of synthetic time series you need for your downstream applications.
+
+For example, if your data is at daily frequency and has weekly patterns (day-of-week effects), your window length should be at least 7 time steps to capture one full cycle. However, for best results, you might want to use 3-4 weeks (21-28 time steps) to ensure the model properly learns the weekly patterns. Similarly, if you need to generate monthly forecasts, you would want longer windows to ensure the model learns longer-term dependencies.
+
 #### Can TimeVAE handle missing values?
 
 The current implementation doesn't explicitly handle missing values. You would need to preprocess your data to fill in missing values before using TimeVAE.
