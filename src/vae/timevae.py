@@ -268,10 +268,12 @@ class TimeVAE(BaseVariationalAutoencoder):
         # self.custom_seas is a Keras TrackedList, need to convert it
         # back to list of tuples so it is serializable
         if self.custom_seas is not None:
-            self.custom_seas = [
+            custom_seas_serializable = [
                 (int(num_seasons), int(len_per_season))
                 for num_seasons, len_per_season in self.custom_seas
             ]
+        else:
+            custom_seas_serializable = None
 
         dict_params = {
             "seq_len": self.seq_len,
@@ -282,7 +284,7 @@ class TimeVAE(BaseVariationalAutoencoder):
                 self.hidden_layer_sizes
             ),  # make sure it's a list which is serializable
             "trend_poly": self.trend_poly,
-            "custom_seas": self.custom_seas,
+            "custom_seas": custom_seas_serializable,
             "use_residual_conn": self.use_residual_conn,
         }
         params_file = os.path.join(model_dir, f"{self.model_name}_parameters.pkl")
