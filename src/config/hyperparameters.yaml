@@ -9,6 +9,9 @@ timeVAE:
   use_residual_conn: true
   trend_poly: 0
   custom_seas: null
+  # custom_seas: # Example custom seasonality; daily level data
+  #   - [12, 30] # Example: 12 seasons with 30 time steps per season to model annual seasonality
+  #   - [7, 1] # Example: 7 seasons with 1 time steps per season to model weekly seasonality
 
 vae_dense:
   latent_dim: 8
